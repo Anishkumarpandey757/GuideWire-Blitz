@@ -22,6 +22,7 @@ This project is prepared for **DEVTrails 2026 Phase 1** under:
 - [Persona-Based Scenarios](#persona-based-scenarios)
 - [Application Workflow](#application-workflow)
 - [AI/ML Integration](#aiml-integration)
+- [Adversarial Defense & Anti-Spoofing Strategy](#adversarial-defense--anti-spoofing-strategy)
 - [Dashboards](#dashboards)
 - [Multilingual Accessibility](#multilingual-accessibility)
 - [UI/UX Design Direction](#uiux-design-direction)
@@ -156,6 +157,153 @@ Payout is parametric and band-based (not reimbursement-style).
 - **Assistant support:** multilingual explanation of premium, claim status, and payout logic
 
 AI supports explainability and automation, while core payout logic remains deterministic and auditable.
+Fraud detection in RouteRaksha goes beyond duplicate claims and basic GPS validation. The platform uses multi-signal anti-spoofing logic combining device, activity, trigger-correlation, and coordinated-pattern analysis.
+
+---
+
+## Adversarial Defense & Anti-Spoofing Strategy
+
+As part of our fraud prevention design, RouteRaksha includes an additional adversarial defense layer to handle coordinated GPS spoofing attacks and false trigger-based payout attempts.
+
+### Why this matters
+A major weakness in parametric insurance systems is relying only on GPS coordinates to determine whether a rider was present in an affected zone. A bad actor can spoof location while staying safely at home and attempt to trigger false payouts. Because of this, RouteRaksha does not rely on GPS alone.
+
+### 1. Differentiation: Real stranded rider vs spoofed rider
+
+Our system differentiates between a genuinely affected delivery rider and a spoofing attacker by combining multiple signals instead of trusting one location source.
+
+A genuine stranded rider is expected to show:
+- normal shift activation during the insured time slot,
+- realistic mobility history before the disruption,
+- route or order activity consistent with being on duty,
+- zone presence that matches weather and access conditions,
+- timing consistency between trigger event and rider activity,
+- device behavior consistent with normal app usage.
+
+A spoofing attacker is more likely to show:
+- sudden impossible location jumps,
+- location present in affected zone without realistic movement history,
+- no supporting activity before or during the disruption,
+- repeated claims from multiple accounts in the same suspicious pattern,
+- inconsistent device or network behavior,
+- many claims clustered around the same payout window.
+
+Instead of binary GPS validation, our architecture uses a **multi-signal confidence model** for claim authenticity.
+
+### 2. Data points used beyond GPS
+
+To detect advanced fraud rings, RouteRaksha analyzes multiple data points in addition to location coordinates:
+
+#### Mobility and device consistency
+- speed and route continuity
+- impossible movement jumps
+- background location consistency over time
+- device ID / app session continuity
+- emulator or suspicious device patterns
+- mock location / developer-mode risk flags where available
+
+#### Work and platform activity signals
+- shift start and active slot overlap
+- order acceptance / order history consistency
+- pickup / drop timing patterns
+- time since last genuine activity
+- dark-store assignment consistency
+- rider availability status
+
+#### Network and behavioral signals
+- IP / network pattern consistency
+- repeated claims from clustered accounts
+- abnormal timing of claims across a Telegram-like fraud ring pattern
+- many users claiming from the same event with identical behavior
+- repeated threshold-edge claims
+- account age and prior fraud history
+
+#### Trigger correlation signals
+- whether the rider’s timeline matches the actual trigger window
+- whether route delay / closure / outage signals support the claim
+- whether nearby riders show similar but not identical genuine patterns
+- whether the rider’s activity dropped in a realistic way during the disruption
+
+### 3. AI/ML anti-spoofing logic
+
+Our anti-spoofing layer combines:
+- rule-based fraud checks,
+- anomaly scoring,
+- and coordinated-pattern detection.
+
+#### Rule-based checks
+- duplicate claim detection
+- impossible geo-jumps
+- no insured-slot overlap
+- no recent rider activity before claim
+- same device used across suspicious accounts
+- repeated claims without valid behavior trail
+
+#### ML / anomaly features
+- unusual location trajectory
+- mismatch between claimed zone and historical work zone
+- unrealistic stationary pattern in a severe trigger zone
+- repeated coordinated claims across nearby accounts
+- payout-trigger behavior clustering
+- deviation from rider’s normal operating pattern
+
+The fraud engine produces:
+- **low risk** → auto-approve
+- **medium risk** → soft review
+- **high risk** → manual review / temporary hold
+
+### 4. UX balance: protecting honest riders
+
+A strong anti-spoofing system should not unfairly punish honest riders, especially during bad weather or poor network conditions.
+
+To maintain fairness, RouteRaksha does not automatically reject every suspicious claim. Instead, the workflow uses layered handling:
+
+#### Low-risk claims
+If the claim matches trigger, slot, and activity patterns clearly, payout proceeds automatically.
+
+#### Medium-risk claims
+If some signals are missing due to poor network or device instability, the system places the claim in a **review state** instead of rejecting it. The rider sees a simple message such as:
+> “Your claim is being verified due to signal inconsistency. No action is needed right now.”
+
+#### High-risk claims
+Claims with strong spoofing indicators are temporarily held and reviewed before payout.
+
+### 5. Honest rider protection mechanisms
+
+To avoid unfair penalties for genuine workers in difficult conditions, the system includes:
+
+- tolerance for temporary GPS drift during heavy rain or weak connectivity,
+- acceptance of partial evidence instead of requiring perfect sensor data,
+- fallback to recent trusted movement history,
+- comparison with zone-level disruption context,
+- explainable review messages in local language,
+- no immediate harsh penalty for first-time ambiguous cases.
+
+This helps ensure that a genuine rider with poor connectivity is not treated the same as a coordinated fraud attacker.
+
+### 6. Defense against coordinated fraud rings
+
+RouteRaksha is also designed to detect fraud at the **group level**, not only at the individual level.
+
+The system can flag:
+- many claims from the same zone with identical suspicious patterns,
+- synchronized claim timing,
+- repeated device or network overlaps,
+- shared abnormal movement signatures,
+- coordinated exploitation of the same payout threshold.
+
+This makes the platform more resilient against organized GPS-spoofing groups.
+
+### 7. Architectural impact
+
+This adversarial defense layer strengthens the core platform by adding:
+- device and activity-aware fraud signals,
+- coordinated-pattern analytics,
+- multi-signal authenticity scoring,
+- explainable review states,
+- and safer payout decisioning.
+
+This ensures RouteRaksha remains practical, fair, and resilient even under advanced spoofing attacks.
 
 ---
 
@@ -204,7 +352,8 @@ AI supports explainability and automation, while core payout logic remains deter
 ![RouteRaksha Architecture](./assets/architecture.png)
 
 ### Summary
-Android app + trigger ingestion + FastAPI services + forecasting + fraud checks + claims/payout engine + multilingual assistant + analytics feedback loop.
+Android app + trigger ingestion + FastAPI services + forecasting + fraud checks + anti-spoofing layer + claims/payout engine + multilingual assistant + analytics feedback loop.
+The architecture also includes an adversarial defense layer for GPS spoofing detection using device, activity, and coordinated-claim analytics.
 
 ---
 
@@ -251,6 +400,9 @@ Android app + trigger ingestion + FastAPI services + forecasting + fraud checks 
 
 ### Phase 3
 - stronger fraud detection
+- anti-spoofing heuristics
+- coordinated fraud ring detection
+- flagged claim review workflow
 - admin dashboard and analytics
 - multilingual explanation refinement
 - end-to-end demo hardening
