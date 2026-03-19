@@ -299,5 +299,6 @@ GuideWire-Blitz/
 
 ---
 
-## Team Vision
+## Team BLITZ
+
 Build a focused, explainable, multilingual, and rider-friendly weekly income protection system for real-world delivery disruption conditions.
