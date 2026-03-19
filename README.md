@@ -295,7 +295,7 @@ GuideWire-Blitz/
 ## Submission Links
 - **GitHub Repository:** https://github.com/Anishkumarpandey757/GuideWire-Blitz
 - **UI/UX (Stitch):** https://stitch.withgoogle.com/preview/2838452718460097145?node-id=e07e976898894b4aa4bf8ed2bf0b2f37
-- **2-Minute Video:** Add your public video link here
+- **2-Minute Video:** https://drive.google.com/file/d/1XGGN85sT7lwsViycgGHwR_cT_qluvqAa/view?usp=sharing
 
 ---
 
